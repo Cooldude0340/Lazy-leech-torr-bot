@@ -16,11 +16,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+import os
 import requests 
 import re
 import json
 import asyncio
-from ULTRA.utils import admin_cmd, edit_or_reply, sudo_cmd
+from pyrogram import client
 
 async def callAPI(search_str):
     query = '''
