@@ -21,7 +21,8 @@ import requests
 import re
 import json
 import asyncio
-from pyrogram import client
+from pyrogram import Client. filters
+from ,, import ALL_CHATS,help_dict
 
 async def callAPI(search_str):
     query = '''
