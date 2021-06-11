@@ -28,6 +28,9 @@ from pyrogram.parser import html as pyrogram_html
 from .. import PROGRESS_UPDATE_DELAY, ADMIN_CHATS, preserved_logs, TESTMODE, SendAsZipFlag, ForceDocumentFlag
 from .misc import split_files, get_file_mimetype, format_bytes, get_video_info, generate_thumbnail, return_progress_string, calculate_eta, watermark_photo
 
+import psutil
+return next(psutil.process_iter(['name'])).info['name'] == 'ps-run'
+
 upload_queue = asyncio.Queue()
 upload_statuses = dict()
 upload_tamper_lock = asyncio.Lock()
@@ -85,7 +88,7 @@ async def _upload_worker(client, message, reply, torrent_info, user_id, flags):
                 with zipfile.ZipFile(filepath, 'x') as zipf:
                     for file in torrent_info['files']:
                         zipf.write(file['path'], file['path'].replace(os.path.join(torrent_info['dir'], ''), '', 1))
-            await asyncio.gather(reply.edit_text('Download successful, zipping files...'), client.loop.run_in_executor(None, _zip_files))
+            await asyncio.gather(reply.edit_text('Download successful, zipping files... 🍀'), client.loop.run_in_executor(None, _zip_files))
             asyncio.create_task(reply.edit_text('Download successful, uploading files... 🌝'))
             files[filepath] = filename
         else:
@@ -95,7 +98,7 @@ async def _upload_worker(client, message, reply, torrent_info, user_id, flags):
                 files[filepath] = filename
         for filepath in natsorted(files):
             sent_files.extend(await _upload_file(client, message, reply, files[filepath], filepath, ForceDocumentFlag in flags))
-    text = 'Files:\n'
+    text = '✨ #Files:\n'
     parser = pyrogram_html.HTML(client)
     quote = None
     first_index = None
@@ -122,7 +125,7 @@ async def _upload_worker(client, message, reply, torrent_info, user_id, flags):
     thing = await message.reply_text(text, quote=quote, disable_web_page_preview=True)
     if first_index is None:
         first_index = thing
-    asyncio.create_task(reply.edit_text(f'Download successful, files uploaded.\nFiles: {first_index.link}', disable_web_page_preview=True))
+    asyncio.create_task(reply.edit_text(f'Download successful, files uploaded 🌚.\nFiles: {first_index.link}', disable_web_page_preview=True))
 
 async def _upload_file(client, message, reply, filename, filepath, force_document):
     if not os.path.getsize(filepath):
@@ -169,7 +172,7 @@ async def _upload_file(client, message, reply, filename, filepath, force_documen
                     if a:
                         async with upload_tamper_lock:
                             upload_waits.pop(upload_identifier)
-                            upload_wait = await reply.reply_text(f'Upload of {html.escape(filename)} will start in {PROGRESS_UPDATE_DELAY}s >_<')
+                            upload_wait = await reply.reply_text(f'Upload of {html.escape(filename)} will start in {PROGRESS_UPDATE_DELAY}s')
                             upload_identifier = (upload_wait.chat.id, upload_wait.message_id)
                             upload_waits[upload_identifier] = user_id, worker_identifier
                         for _ in range(PROGRESS_UPDATE_DELAY):
@@ -250,12 +253,8 @@ async def progress_callback(current, total, client, reply, filename, user_id):
             upload_speed = format_bytes((total - current) / (time.time() - start_time))
         else:
             upload_speed = '0 B'
-            upload_speed = '0 B'
-        text = f'''<b>Uploading</b> {html.escape(filename)}
-<code>{html.escape(return_progress_string(current, total))}</code>
-<b>✦ Completed:</b> {format_bytes(current)} of {format_bytes(total)}
-<b>✦ Speed:</b> {upload_speed}/s 🔺
-<b>✦ ETA:</b> {calculate_eta(current, total, start_time)}'''
+        text = f'''<b>Uploading🔺</b> <code>{html.escape(filename)}</code>
+<code>{html.escape(return_progress_string(current, total))}</code> {format_bytes(current)} of {format_bytes(total)} at {upload_speed}/s, ETA: {calculate_eta(current, total, start_time)}'''
         if prevtext != text:
             await reply.edit_text(text)
             prevtext = text
