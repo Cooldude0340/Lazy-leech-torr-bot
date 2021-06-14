@@ -249,7 +249,7 @@ async def handle_leech(client, message, gid, reply, user_id, flags):
         )
     elif torrent_info['status'] == 'removed':
         await asyncio.gather(
-            message.reply_text('Your download has been manually cancelled.'),
+            message.reply_text('Your download has been manually cancelled. 🌚'),
             reply.delete()
         )
     else:
